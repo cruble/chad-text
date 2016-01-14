@@ -3,7 +3,19 @@ Rails.application.routes.draw do
   devise_for :users, :controllers => { registrations: 'registrations' }
 
 
-  #root ... 
+  match 'error/' => 'notifications#server_error', via: [:get, :post]
+
+  resources :administrators, only: [:new, :create]
+
+  # You can have the root of your site routed with "root"
+  post 'notifications/notify' => 'notifications#notify'
+  root 'notifications#index', as: 'home'
+  post 'twilio/voice' => 'twilio#voice'
+
+  #from Sparrow 
+  get 'incoming/' => 'notifications#incoming'
+  post 'new/' => 'notifications#new'
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
