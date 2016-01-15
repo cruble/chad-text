@@ -20,7 +20,7 @@ class NotificationsController < ApplicationController
     # message_array = @body.split
 
     #if I am the sender... 
-    if @phone_number = "+19179684122"
+    if @phone_number == "+19179684122"
 
       @user = "Chad"
       @message_body = process_chad_text(@body)
