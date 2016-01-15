@@ -9,7 +9,8 @@ Rails.application.routes.draw do
 
   # You can have the root of your site routed with "root"
   post 'notifications/notify' => 'notifications#notify'
-  root 'notifications#index', as: 'home'
+  root 'welcome#index'
+  # root 'notifications#index', as: 'home'
   post 'twilio/voice' => 'twilio#voice'
 
   #from Sparrow 
