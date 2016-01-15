@@ -66,3 +66,4 @@ end
 
 gem 'bootstrap-sass', '~> 3.1.1'
 gem 'devise'
+ruby "2.2.0"
