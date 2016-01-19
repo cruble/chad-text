@@ -11,7 +11,86 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160112190110) do
+ActiveRecord::Schema.define(version: 20160116205445) do
+
+  create_table "game_benches", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "game_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "game_benches", ["game_id"], name: "index_game_benches_on_game_id"
+  add_index "game_benches", ["user_id"], name: "index_game_benches_on_user_id"
+
+  create_table "game_players", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "game_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "game_players", ["game_id"], name: "index_game_players_on_game_id"
+  add_index "game_players", ["user_id"], name: "index_game_players_on_user_id"
+
+  create_table "games", force: :cascade do |t|
+    t.date     "game_date"
+    t.string   "opponent"
+    t.string   "result"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer  "season_id"
+    t.string   "status"
+  end
+
+  add_index "games", ["season_id"], name: "index_games_on_season_id"
+
+  create_table "player_season_bencheds", force: :cascade do |t|
+    t.integer  "season_id"
+    t.integer  "user_id"
+    t.integer  "count"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "player_season_bencheds", ["season_id"], name: "index_player_season_bencheds_on_season_id"
+  add_index "player_season_bencheds", ["user_id"], name: "index_player_season_bencheds_on_user_id"
+
+  create_table "player_season_playeds", force: :cascade do |t|
+    t.integer  "season_id"
+    t.integer  "user_id"
+    t.integer  "count"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "player_season_playeds", ["season_id"], name: "index_player_season_playeds_on_season_id"
+  add_index "player_season_playeds", ["user_id"], name: "index_player_season_playeds_on_user_id"
+
+  create_table "season_player_bencheds", force: :cascade do |t|
+    t.integer "season_id"
+    t.integer "user_id"
+    t.integer "count"
+  end
+
+  add_index "season_player_bencheds", ["season_id"], name: "index_season_player_bencheds_on_season_id"
+  add_index "season_player_bencheds", ["user_id"], name: "index_season_player_bencheds_on_user_id"
+
+  create_table "season_player_playeds", force: :cascade do |t|
+    t.integer "season_id"
+    t.integer "user_id"
+    t.integer "count"
+  end
+
+  add_index "season_player_playeds", ["season_id"], name: "index_season_player_playeds_on_season_id"
+  add_index "season_player_playeds", ["user_id"], name: "index_season_player_playeds_on_user_id"
+
+  create_table "seasons", force: :cascade do |t|
+    t.string   "name"
+    t.boolean  "is_current"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false
