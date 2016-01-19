@@ -235,7 +235,7 @@ class NotificationsController < ApplicationController
         @client.account.messages.create(
                     :from => from,
                     :to => friend.phone,
-                    :body => "From Shufflebot:"
+                    :body => "From Shufflebot: #{message}"
                     )
         end
     
