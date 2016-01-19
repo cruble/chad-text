@@ -125,7 +125,7 @@ class NotificationsController < ApplicationController
   def process_game_reply(u, g)
 
         # define valid responses (positive and negative)
-        output = "Beginning of process game reply method."
+        # output = "Beginning of process game reply method."
 
         # create bench or playerobject based on response 
         # (maybe check if there is a response already?)
@@ -150,11 +150,15 @@ class NotificationsController < ApplicationController
           
             if g.game_players.count == 4 && g.game_benches.count == 1
               #ideal case scenario
-              output = "Well, that worked out. \n Playing: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name}\n Go Ethel!"
+              message = "Well, that worked out. \n Playing: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name}\n Go Ethel!"
+              send_whole_team(message)
               g.status = "closed"
               g.save 
+
             elsif g.game_benches.count > 1 && g.game_benches.count <=5
-              output = "Yikes. We have #{g.game_benches.count} players sitting out. Please initiate the substitue protocol. Human intervention required! Text Mike, Loren.. anyone. Just get to four!"
+              message = "Yikes. We have #{g.game_benches.count} players sitting out. Please initiate the substitue protocol. Human intervention required! Text Mike, Loren.. anyone. Just get to four!"
+              send_whole_team(message)
+
             elsif g.game_players.count == 5 
               player_hash = {}
               User.all.each do |user|
@@ -192,7 +196,9 @@ class NotificationsController < ApplicationController
               GamePlayer.find_by(user_id: sub.id, game_id: g.id).destroy
               GameBench.create(user_id: sub.id, game_id: g.id)
 
-              output = "Randomly selected sub from #{player_hash.count} eligible players is #{sub.first_name}.\n In the game: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name} \n Have a great game!"
+              message = "Randomly selected sub from #{player_hash.count} eligible players is #{sub.first_name}.\n In the game: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name} \n Have a great game!"
+              send_whole_team(message)
+
               g.status = "closed"
               g.save 
 
@@ -214,6 +220,22 @@ class NotificationsController < ApplicationController
                     :from => from,
                     :to => friend.phone,
                     :body => "From Shufflebot:\nHey #{friend.first_name}, #{message} [In] or [Out]?"
+                    )
+        end
+    
+  end 
+
+
+  def send_whole_team(message)
+
+    @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
+
+        from = ENV['TWILIO_PHONE']
+        User.all.each do |friend|
+        @client.account.messages.create(
+                    :from => from,
+                    :to => friend.phone,
+                    :body => "From Shufflebot:"
                     )
         end
     
