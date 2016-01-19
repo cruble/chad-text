@@ -54,12 +54,17 @@ class NotificationsController < ApplicationController
 
       elsif @command == "shufflenew"
         
-        next_tuesday = Date.commercial(Date.today.year, 1+Date.today.cweek, 2)
-        next_game = Game.create(game_date: next_tuesday, result: "TBD", status: "open", season_id: Season.last.id)
 
-        format_date = next_game.game_date.strftime('%a, %b %d')
 
-        send_team("Next game is on #{format_date}.\n")
+        if Date.today.wday == 2
+          next_game = Game.create(game_date: Date.today, result: "TBD", status: "open", season_id: Season.last.id)
+          send_team("Next game is tonight.\n")
+
+        else
+          next_tuesday = Date.commercial(Date.today.year, 1+Date.today.cweek, 2)
+          format_date = next_game.game_date.strftime('%a, %b %d')
+          send_team("Next game is on #{format_date}.\n")
+        end 
 
 
       elsif @command == "shufflestatus"
@@ -76,9 +81,9 @@ class NotificationsController < ApplicationController
     end
 
     #checking if output is nil just for me now 
-    if !output && user.id == 1
-      output = "output is nil chad"
-    end 
+    # if !output && user.id == 1
+    #   output = "output is nil chad"
+    # end 
 
     respond(output)
 
@@ -178,6 +183,10 @@ class NotificationsController < ApplicationController
               if last_sub_id
               bench_array.delete(last_sub_id)
               end 
+
+              #for test
+
+              # sub = User.find(1)
 
               sub = User.find(bench_array.sample)
               GamePlayer.find_by(user_id: sub.id, game_id: g.id).destroy
