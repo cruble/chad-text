@@ -52,6 +52,21 @@ class NotificationsController < ApplicationController
       elsif @command == "shuffle"
 
         send_team("Are you in this Tuesday?")
+      elsif @command == "shufflestatus"
+        g = Game.last 
+        player_names = []
+        bench_names = []
+        g.game_players.each do |gp|
+          player_names << gp.user.first_name
+        end
+
+        g.game_benches.each do |gb|
+          bench_names << gb.user.first_name
+        end
+
+        message = "Playing: #{player_names}\n Bench: #{bench_names}"
+        send_me(message)
+
 
       elsif @command == "shufflenew"
         
