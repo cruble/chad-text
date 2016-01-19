@@ -44,6 +44,7 @@ class NotificationsController < ApplicationController
         output = "This is a random quote."
       elsif @command == "lane"
         output = "This is for lane. "
+        send_me("Test of a second message")
       elsif @command == "charles"
         output = "This is for Charles."
       elsif @command == "compliment"
@@ -139,24 +140,27 @@ class NotificationsController < ApplicationController
 
         if total_replies <= 3
           output = "Thanks #{u.first_name} for your response. \nYou were #{total_replies.ordinalize} to get back to me. \nStill waiting for #{5 - total_replies} more replies. Please standby."
+            send_me("For Chad: #{u.first_name} just replied with #{@message_array[0]}.")
             #add current_season_total_played || current_season_total_benched on the user model 
         elsif total_replies == 4
 
           output = "Thanks #{u.first_name} for your response. \nYou were #{total_replies.ordinalize} to get back to me. \nStill waiting for #{5 - total_replies} more reply. Please standby."
+            send_me("For Chad: #{u.first_name} just replied with #{@message_array[0]}.")
+
 
         elsif total_replies == 5
 
-            output = "Another output. Total replies: #{total_replies}"
+            # output = "Another output. Total replies: #{total_replies}"
           
             if g.game_players.count == 4 && g.game_benches.count == 1
               #ideal case scenario
-              message = "Well, that worked out. \n Playing: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name}\n Go Ethel!"
+              message = "Well, that worked out. \n Playing: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name}\n Don't forget the tangs! Go Ethel!"
               send_whole_team(message)
               g.status = "closed"
               g.save 
 
             elsif g.game_benches.count > 1 && g.game_benches.count <=5
-              message = "Yikes. We have #{g.game_benches.count} players sitting out. Please initiate the substitue protocol. Human intervention required! Text Mike, Loren.. anyone. Just get to four!"
+              message = "Yikes. We have #{g.game_benches.count} players sitting out. Please initiate the substitue protocol. Human intervention required! Text Mike, Courtney, Loren.. anyone. Just get to four!"
               send_whole_team(message)
 
             elsif g.game_players.count == 5 
@@ -196,7 +200,7 @@ class NotificationsController < ApplicationController
               GamePlayer.find_by(user_id: sub.id, game_id: g.id).destroy
               GameBench.create(user_id: sub.id, game_id: g.id)
 
-              message = "Randomly selected sub from #{player_hash.count} eligible players is #{sub.first_name}.\n In the game: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name} \n Have a great game!"
+              message = "Randomly selected sub from #{player_hash.count} eligible players is #{sub.first_name}.\n In the game: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name} \n Have a great game and don't forget the tangs!"
               send_whole_team(message)
 
               g.status = "closed"
