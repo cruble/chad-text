@@ -41,17 +41,43 @@ class NotificationsController < ApplicationController
       #let's add some commands (refactor later) 
 
       if @command == "quote"
-        output = "This is a random quote."
+        if @is_new
+          quote = @message_body.capitalize 
+          if @author 
+            @author = @author.titleize
+          end 
+
+          Nugget.create(content: quote, tag: @tag, attributed_to: @author)
+          message = "You just added: \n'#{quote}'"
+          if @author 
+            message += "\nAuthor is: #{@author.titleize}"
+          end 
+          if @tag
+            message += "\nTag is: #{@tag}"
+          end 
+          send_me(message)
+        end 
       elsif @command == "lane"
         output = "This is for lane. "
         send_me("Test of a second message")
       elsif @command == "charles"
         output = "This is for Charles."
       elsif @command == "compliment"
-        output = "You are very handsome."
-      elsif @command == "shuffle"
+        compliment = Nugget.where(tag: "compliment").all.sample
+          message = "\'#{compliment.content.capitalize}\'"
+        if compliment.attributed_to 
+          message += "\n-- #{compliment.attributed_to.titleize}"
+        end 
+        send_me(message)
+      elsif @command == "shufflegem"
+        # shufflenugget = Nugget.all.sample.content
+        shufflenugget = Nugget.where(tag: "shuffle").all.sample
+        message = "\'#{shufflenugget.content.capitalize}\'"
+        if shufflenugget.attributed_to 
+          message += "\n-- #{shufflenugget.attributed_to.titleize}"
+        end 
 
-        send_team("Are you in this Tuesday?")
+        send_me(message)
       elsif @command == "shufflestatus"
         g = Game.last 
         player_names = []
@@ -69,24 +95,16 @@ class NotificationsController < ApplicationController
 
 
       elsif @command == "shufflenew"
-        
-
 
         if Date.today.wday == 2
           next_game = Game.create(game_date: Date.today, result: "TBD", status: "open", season_id: Season.last.id)
-          send_team("Next game is tonight.\n")
+          send_team("Next game is tonight!!\n")
 
         else
           next_tuesday = Date.commercial(Date.today.year, 1+Date.today.cweek, 2)
           format_date = next_game.game_date.strftime('%a, %b %d')
           send_team("Next game is on #{format_date}.\n")
         end 
-
-
-      elsif @command == "shufflestatus"
-
-
-
 
       else
         # output = "No command found. Hi #{user.first_name}. You still rock."
@@ -126,11 +144,30 @@ class NotificationsController < ApplicationController
         command_sign = body.match(/\/[a-zA-Z]+/)[0] 
         @command = command_sign[1..-1]
       end
+
+      if body.match(/\+[nN]/)
+        new_flag = body.match(/\+[nN]/)[0] 
+        @is_new = true
+      end
+
+      if body.match(/-[a-zA-Z]+ [a-zA-Z]+-|-[a-zA-Z]+-/)
+        author_flag = body.match(/-[a-zA-Z]+ [a-zA-Z]+-|-[a-zA-Z]+-/)[0] 
+        @author = author_flag[1..-2]
+      end
+
+      if body.match(/-[a-zA-Z]+/)
+        first_name_flag = body.match(/-[a-zA-Z]+/)[0] 
+      end
+
+
+      if body.match(/[a-zA-Z]+-/)
+        last_name_flag = body.match(/[a-zA-Z]+-/)[0] 
+      end
       
       message_array = body.split
 
       sanitized_body = message_array.reject do |word| 
-        word == group_sign || word == num_invited_sign || word == tag_sign || word == command_sign
+        word == group_sign || word == num_invited_sign || word == tag_sign || word == command_sign || word == new_flag || word == author_flag || word == first_name_flag || word == last_name_flag
       end
       sanitized_body.join(' ').downcase
 
@@ -264,7 +301,7 @@ class NotificationsController < ApplicationController
 
     @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
 
-        from = ENV['TWILIO_PHONE']
+        from = ENV['TWILIO_PHONE_TEST']
         @client.account.messages.create(
                     :from => from,
                     :to => "+19179684122",
