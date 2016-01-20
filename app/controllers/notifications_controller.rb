@@ -105,7 +105,17 @@ class NotificationsController < ApplicationController
           format_date = next_game.game_date.strftime('%a, %b %d')
           send_team("Next game is on #{format_date}.\n")
         end 
+      elsif @command == "win"
+        g = Game.last 
+        g.result = "W"
+        g.save 
+        send_whole_team("Nice job on the win Ethel! That is our #{Game.where(result: "W").count.ordinalize} win. So far we have #{Game.where(result: "L").count} losses.")
 
+      elsif @command == "loss"
+        g = Game.last 
+        g.result = "L"
+        g.save 
+        send_whole_team("Tough break on the loss Ethel. That is our #{Game.where(result: "L").count.ordinalize} loss.\nBut we have #{Game.where(result: "L").count} wins.\nLook on the bright side!")
       else
         # output = "No command found. Hi #{user.first_name}. You still rock."
       end
@@ -291,7 +301,7 @@ class NotificationsController < ApplicationController
         @client.account.messages.create(
                     :from => from,
                     :to => friend.phone,
-                    :body => "From Shufflebot: #{message}"
+                    :body => "From Shufflebot: \n#{message}"
                     )
         end
     
