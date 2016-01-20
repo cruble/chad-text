@@ -61,7 +61,13 @@ class NotificationsController < ApplicationController
         output = "This is for lane. "
         send_me("Test of a second message")
       elsif @command == "charles"
+        charles_quote = Nugget.where(tag: "charles").all.sample
         output = "This is for Charles."
+        message = "\'#{charles_quote.content.capitalize}\'"
+        if compliment.attributed_to 
+          message += "\n-- #{charles_quote.attributed_to.titleize}"
+        end 
+        send_me(message)
       elsif @command == "compliment"
         compliment = Nugget.where(tag: "compliment").all.sample
           message = "\'#{compliment.content.capitalize}\'"
@@ -109,7 +115,7 @@ class NotificationsController < ApplicationController
         g = Game.last 
         g.result = "W"
         g.save 
-        send_whole_team("Nice job on the win Ethel! That is our #{Game.where(result: "W").count.ordinalize} win. So far we have #{Game.where(result: "L").count} losses.")
+        send_whole_team("Nice job on the win Ethel! That is our #{Game.where(result: "W").count.ordinalize} win for the season. So far we have #{Game.where(result: "L").count} losses.")
 
       elsif @command == "loss"
         g = Game.last 
