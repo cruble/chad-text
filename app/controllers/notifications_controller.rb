@@ -64,7 +64,7 @@ class NotificationsController < ApplicationController
         charles_quote = Nugget.where(tag: "charles").all.sample
         output = "This is for Charles."
         message = "\'#{charles_quote.content.capitalize}\'"
-        if compliment.attributed_to 
+        if charles_quote.attributed_to 
           message += "\n-- #{charles_quote.attributed_to.titleize}"
         end 
         send_me(message)
