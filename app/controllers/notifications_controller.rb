@@ -301,7 +301,7 @@ class NotificationsController < ApplicationController
 
     @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
 
-        from = ENV['TWILIO_PHONE_TEST']
+        from = ENV['TWILIO_PHONE']
         @client.account.messages.create(
                     :from => from,
                     :to => "+19179684122",
