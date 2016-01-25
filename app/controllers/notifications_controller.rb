@@ -58,11 +58,14 @@ class NotificationsController < ApplicationController
           send_me(message)
         end 
       elsif @command == "lane"
-        output = "This is for lane. "
-        send_me("Test of a second message")
+        lane_quote = Nugget.where(tag: "lane").all.sample
+        message = "\'#{lane_quote.content.capitalize}\'"
+        if lane_quote.attributed_to 
+          message += "\n-- #{lane_quote.attributed_to.titleize}"
+        end 
+        send_me(message)
       elsif @command == "charles"
         charles_quote = Nugget.where(tag: "charles").all.sample
-        output = "This is for Charles."
         message = "\'#{charles_quote.content.capitalize}\'"
         if charles_quote.attributed_to 
           message += "\n-- #{charles_quote.attributed_to.titleize}"
@@ -108,7 +111,7 @@ class NotificationsController < ApplicationController
 
         else
           next_tuesday = Date.commercial(Date.today.year, 1+Date.today.cweek, 2)
-          format_date = next_game.game_date.strftime('%a, %b %d')
+          format_date = next_tuesday.strftime('%a, %b %d')
           send_team("Next game is on #{format_date}.\n")
         end 
       elsif @command == "win"
