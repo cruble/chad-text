@@ -13,3 +13,17 @@ have to deal with multiple responses.. so if someone replies twice.. we know tha
 
 add a current status code for shufflestatus 
 
+Allow teammates to see quotes... 
+
+Add /win and /loss with Season filter. 
+
+support multiple tags 
+
+page with abilite to read all text inputs and also another page to send a team text or send to a specific user (form)
+
+have to be able to destroy a game and destroy the game benches and game players. i think that's the destroy-depend flag or domething like that 
+
+
+
+
+

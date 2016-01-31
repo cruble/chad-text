@@ -112,6 +112,8 @@ class NotificationsController < ApplicationController
         else
           next_tuesday = Date.commercial(Date.today.year, 1+Date.today.cweek, 2)
           format_date = next_tuesday.strftime('%a, %b %d')
+          next_game = Game.create(game_date: next_tuesday, result: "TBD", status: "open", season_id: Season.last.id)
+          #send_me("Next game is on #{format_date}.\n")
           send_team("Next game is on #{format_date}.\n")
         end 
       elsif @command == "win"
