@@ -9,9 +9,9 @@ class User < ActiveRecord::Base
   has_many :games, through: :game_benches
 
   def season_benched
-    this_season = PlayerSeasonBenched.find_by(user_id: self.id, season_id: Season.last.id)
+    this_season = PlayerSeasonBenched.where(user_id: self.id, season_id: Season.last.id).count
     if this_season
-      this_season.count
+      this_season
     else 
       0
     end

@@ -36,7 +36,9 @@ class NotificationsController < ApplicationController
     #if I am the sender... 
     if user.phone == "+19179684122"
 
-      @message_body = process_chad_text(@body)
+      quote_tags = Nugget.uniq.pluck(:tag).compact
+
+      @message_body = process_message_text(@body)
 
       #let's add some commands (refactor later) 
 
@@ -57,36 +59,14 @@ class NotificationsController < ApplicationController
           end 
           send_me(message)
         end 
-      elsif @command == "lane"
-        lane_quote = Nugget.where(tag: "lane").all.sample
-        message = "\'#{lane_quote.content.capitalize}\'"
-        if lane_quote.attributed_to 
-          message += "\n-- #{lane_quote.attributed_to.titleize}"
+      elsif quote_tags.include? @command 
+        quote = Nugget.where(tag: @command).all.sample
+        message = "\'#{quote.content.capitalize}\'"
+        if quote.attributed_to 
+          message += "\n-- #{quote.attributed_to.titleize}"
         end 
         send_me(message)
-      elsif @command == "charles"
-        charles_quote = Nugget.where(tag: "charles").all.sample
-        message = "\'#{charles_quote.content.capitalize}\'"
-        if charles_quote.attributed_to 
-          message += "\n-- #{charles_quote.attributed_to.titleize}"
-        end 
-        send_me(message)
-      elsif @command == "compliment"
-        compliment = Nugget.where(tag: "compliment").all.sample
-          message = "\'#{compliment.content.capitalize}\'"
-        if compliment.attributed_to 
-          message += "\n-- #{compliment.attributed_to.titleize}"
-        end 
-        send_me(message)
-      elsif @command == "shufflegem"
-        # shufflenugget = Nugget.all.sample.content
-        shufflenugget = Nugget.where(tag: "shuffle").all.sample
-        message = "\'#{shufflenugget.content.capitalize}\'"
-        if shufflenugget.attributed_to 
-          message += "\n-- #{shufflenugget.attributed_to.titleize}"
-        end 
 
-        send_me(message)
       elsif @command == "shufflestatus"
         g = Game.last 
         player_names = []
@@ -101,6 +81,11 @@ class NotificationsController < ApplicationController
 
         message = "Playing: #{player_names}\n Bench: #{bench_names}"
         send_me(message)
+      elsif @command == "tags"
+        message = quote_tags.join(", ")
+        send_me(message)
+
+          
 
 
       elsif @command == "shufflenew"
@@ -144,7 +129,7 @@ class NotificationsController < ApplicationController
 
   end
 
-  def process_chad_text(body)      
+  def process_message_text(body)      
       
       if body.match(/\@[a-zA-Z0-9]+/)
         group_sign = body.match(/\@[a-zA-Z0-9]+/)[0] 
@@ -222,15 +207,14 @@ class NotificationsController < ApplicationController
 
 
         elsif total_replies == 5
-
-            # output = "Another output. Total replies: #{total_replies}"
-          
+            #ideal case scenario
             if g.game_players.count == 4 && g.game_benches.count == 1
-              #ideal case scenario
               message = "Well, that worked out. \n Playing: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name}\n Don't forget the tangs! Go Ethel!"
               send_whole_team(message)
               g.status = "closed"
-              g.save 
+              g.save
+              #need to association the bench 
+              PlayerSeasonBenched.create(user_id: g.game_benches.all.first.user.id, season_id: Season.last.id)
 
             elsif g.game_benches.count > 1 && g.game_benches.count <=5
               message = "Yikes. We have #{g.game_benches.count} players sitting out. Please initiate the substitue protocol. Human intervention required! Text Mike, Courtney, Loren.. anyone. Just get to four!"
@@ -265,10 +249,6 @@ class NotificationsController < ApplicationController
               bench_array.delete(last_sub_id)
               end 
 
-              #for test
-
-              # sub = User.find(1)
-
               sub = User.find(bench_array.sample)
               GamePlayer.find_by(user_id: sub.id, game_id: g.id).destroy
               GameBench.create(user_id: sub.id, game_id: g.id)
@@ -278,6 +258,12 @@ class NotificationsController < ApplicationController
 
               g.status = "closed"
               g.save 
+
+              #need to association the bench 
+              PlayerSeasonBenched.create(user_id: g.game_benches.all.first.user.id, season_id: Season.last.id)
+              #need to association the players 
+
+
 
             end 
 
