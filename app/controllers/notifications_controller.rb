@@ -213,8 +213,13 @@ class NotificationsController < ApplicationController
               send_whole_team(message)
               g.status = "closed"
               g.save
+              
               #need to association the bench 
-              PlayerSeasonBenched.create(user_id: g.game_benches.all.first.user.id, season_id: Season.last.id)
+              PlayerSeasonBenched.create(user_id: g.game_benches.all.first.user_id, season_id: Season.last.id)
+              #need to association the players
+              g.game_players.each do | gp |
+                PlayerSeasonPlayed.create(user_id: gp.user_id, season_id: Season.last.id)
+              end 
 
             elsif g.game_benches.count > 1 && g.game_benches.count <=5
               message = "Yikes. We have #{g.game_benches.count} players sitting out. Please initiate the substitue protocol. Human intervention required! Text Mike, Courtney, Loren.. anyone. Just get to four!"
@@ -260,8 +265,12 @@ class NotificationsController < ApplicationController
               g.save 
 
               #need to association the bench 
-              PlayerSeasonBenched.create(user_id: g.game_benches.all.first.user.id, season_id: Season.last.id)
-              #need to association the players 
+              PlayerSeasonBenched.create(user_id: g.game_benches.all.first.user_id, season_id: Season.last.id)
+              #need to association the players
+              g.game_players.each do | gp |
+                PlayerSeasonPlayed.create(user_id: gp.user_id, season_id: Season.last.id)
+              end 
+
 
 
 

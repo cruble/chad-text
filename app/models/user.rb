@@ -18,9 +18,9 @@ class User < ActiveRecord::Base
   end 
 
   def season_played 
-    this_season = PlayerSeasonPlayed.find_by(user_id: self.id, season_id: Season.last.id)
+    this_season = PlayerSeasonPlayed.where(user_id: self.id, season_id: Season.last.id).count
     if this_season
-      this_season.count
+      this_season
     else 
       0
     end
