@@ -213,7 +213,7 @@ class NotificationsController < ApplicationController
               send_whole_team(message)
               g.status = "closed"
               g.save
-              
+
               #need to association the bench 
               PlayerSeasonBenched.create(user_id: g.game_benches.all.first.user_id, season_id: Season.last.id)
               #need to association the players
@@ -230,11 +230,10 @@ class NotificationsController < ApplicationController
               User.all.each do |user|
                 player_hash[user.id] = user.season_benched 
               end 
-              #this sorts the hash by value which is number of season benched
-              player_hash.sort_by{|k, v| v}
 
+              
               #this get the first aka lowest value from the hash 
-              lowest_benched_total = player_hash.values[0]
+              lowest_benched_total = player_hash.sort_by{|k, v| v}[0][1]
               bench_array = []
 
               player_hash.each do |player, count|
@@ -258,7 +257,7 @@ class NotificationsController < ApplicationController
               GamePlayer.find_by(user_id: sub.id, game_id: g.id).destroy
               GameBench.create(user_id: sub.id, game_id: g.id)
 
-              message = "Randomly selected sub from #{player_hash.count} eligible players is #{sub.first_name}.\n In the game: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name} \n Have a great game and don't forget the tangs!"
+              message = "Randomly selected sub from #{bench_array.count} eligible players is #{sub.first_name}.\n In the game: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name} \n Have a great game and don't forget the tangs!"
               send_whole_team(message)
 
               g.status = "closed"
