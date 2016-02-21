@@ -3,3 +3,24 @@
 <p>
   The time is now: <%= Time.now %>
 </p>
+<h3> Users </h3>
+<% @users.each do |user|  %>
+  <li> <%=user.first_name  %></li>
+<% end %>
+
+
+<table style="width:100%">
+  <tr>
+    <th>First Name</th>
+    <th>Games Played</th> 
+    <th>Games Benched</th>
+  </tr>
+  <% @users.each do |user|  %>
+
+  <tr>
+    <td> <%= user.first_name %></td>
+    <td> <%= user.season_played %></td> 
+    <td> <%= user.season_benched %></td>
+  </tr>
+  <% end %>
+</table>
