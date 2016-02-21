@@ -117,7 +117,7 @@ class NotificationsController < ApplicationController
       end
 
     else
-      output = "This is not the droid you are looking for."
+      #output = "This is not the droid you are looking for."
     end
 
     #checking if output is nil just for me now 
