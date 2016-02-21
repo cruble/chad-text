@@ -4,14 +4,6 @@ class NotificationsController < ApplicationController
 
   skip_before_action :verify_authenticity_token
 
-  def notify
-    client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
-    message = client.messages.create from: ENV['TWILIO_PHONE'], to: ENV['CHAD_PHONE'], body: 'Learning to send SMS you are. This is great.', media_url: 'http://linode.rabasa.com/yoda.gif'
-    
-    render plain: message.status
-  end
-
-
   def incoming
 
     phone_number = params[:From]
@@ -24,13 +16,45 @@ class NotificationsController < ApplicationController
         # split message into array of words
     @message_array = @body.split
 
+
+    # if session["status"] == "Player-Reply"
+
+    #     GamePlayer.create(user_id: u.id, game_id: g.id)
+
+
+
+    # elsif session["status"] == "Bench-Reply" 
+
+   
+
     if user && Game.last.status == "open"
       game = Game.last 
       unless user.id == 1 && !@in_array.include?(@message_array[0]) && !@out_array.include?(@message_array[0])
         output = process_game_reply(user, game)
       end 
-    # elsif user && Game.last.status == "closed"
-    #   output = "Sorry, this game invite is expired. A new one should be created soon."
+      
+
+
+
+          
+
+      # #checking on repeat with game status as open this will overwrite output
+      # gp = GamePlayer.where(game_id: game.id, user_id: user.id)
+      # gb = GameBench.where(game_id: game.id, user_id: user.id)
+      
+
+      
+      # if gp.first 
+      #   output = "You already responded that you are in. Want to change your response?\n[Yes] or [No]"
+      #   session["status"] = "Player-Reply"  
+      # elsif gb.first 
+      #   output = "You already responded that you are not playing. Want to change your response?\n[Yes] or [No]"
+      #   session["status"] = "Bench-Reply"  
+      # end 
+
+
+    elsif user && Game.last.status == "closed"
+      # output = "Sorry, this game is now closed for responses. A new one should be created soon."
     end 
 
     #if I am the sender... 
@@ -98,7 +122,6 @@ class NotificationsController < ApplicationController
           next_tuesday = Date.commercial(Date.today.year, 1+Date.today.cweek, 2)
           format_date = next_tuesday.strftime('%a, %b %d')
           next_game = Game.create(game_date: next_tuesday, result: "TBD", status: "open", season_id: Season.last.id)
-          #send_me("Next game is on #{format_date}.\n")
           send_team("Next game is on #{format_date}.\n")
         end 
       elsif @command == "win"
@@ -111,7 +134,7 @@ class NotificationsController < ApplicationController
         g = Game.last 
         g.result = "L"
         g.save 
-        send_whole_team("Tough break on the loss Ethel. That is our #{Game.where(result: "L").count.ordinalize} loss.\nBut we have #{Game.where(result: "L").count} wins.\nLook on the bright side!")
+        send_whole_team("Tough break on the loss Ethel. That is our #{Game.where(result: "L").count.ordinalize} loss.\nBut we have #{Game.where(result: "W").count} wins.\nLook on the bright side!")
       else
         # output = "No command found. Hi #{user.first_name}. You still rock."
       end
@@ -132,7 +155,7 @@ class NotificationsController < ApplicationController
 
   end
 
-  def process_message_text(body)      
+  def process_message_text(body)
       
       if body.match(/\@[a-zA-Z0-9]+/)
         group_sign = body.match(/\@[a-zA-Z0-9]+/)[0] 
@@ -267,7 +290,11 @@ class NotificationsController < ApplicationController
               g.save 
 
               #need to association the bench 
-              PlayerSeasonBenched.create(user_id: g.game_benches.all.first.user_id, season_id: Season.last.id)
+
+              g.game_benches.each do | gb |
+                PlayerSeasonBenched.create(user_id: gb.user_id, season_id: Season.last.id)
+              end 
+
               #need to association the players
               g.game_players.each do | gp |
                 PlayerSeasonPlayed.create(user_id: gp.user_id, season_id: Season.last.id)
@@ -283,7 +310,7 @@ class NotificationsController < ApplicationController
 
   end 
 
-
+  #command for creating a game 
   def send_team(message)
 
     @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
@@ -299,7 +326,7 @@ class NotificationsController < ApplicationController
     
   end 
 
-
+  #command for sending just a message to the team
   def send_whole_team(message)
 
     @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
@@ -315,16 +342,16 @@ class NotificationsController < ApplicationController
     
   end 
 
-  def send_me(message)
+def send_me(message)
 
-    @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
+  @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
 
-        from = ENV['TWILIO_PHONE']
-        @client.account.messages.create(
-                    :from => from,
-                    :to => "+19179684122",
-                    :body => "#{message}"
-                    )
+      from = ENV['TWILIO_PHONE']
+      @client.account.messages.create(
+                  :from => from,
+                  :to => "+19179684122",
+                  :body => "#{message}"
+                  )
     
   end 
 
