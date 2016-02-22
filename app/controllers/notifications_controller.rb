@@ -16,34 +16,19 @@ class NotificationsController < ApplicationController
         # split message into array of words
     @message_array = @body.split
 
-
     # if session["status"] == "Player-Reply"
-
     #     GamePlayer.create(user_id: u.id, game_id: g.id)
-
-
-
     # elsif session["status"] == "Bench-Reply" 
-
-   
 
     if user && Game.last.status == "open"
       game = Game.last 
       unless user.id == 1 && !@in_array.include?(@message_array[0]) && !@out_array.include?(@message_array[0])
         output = process_game_reply(user, game)
       end 
-      
-
-
-
-          
-
+    
       # #checking on repeat with game status as open this will overwrite output
       # gp = GamePlayer.where(game_id: game.id, user_id: user.id)
       # gb = GameBench.where(game_id: game.id, user_id: user.id)
-      
-
-      
       # if gp.first 
       #   output = "You already responded that you are in. Want to change your response?\n[Yes] or [No]"
       #   session["status"] = "Player-Reply"  
@@ -54,7 +39,7 @@ class NotificationsController < ApplicationController
 
 
     elsif user && Game.last.status == "closed"
-      # output = "Sorry, this game is now closed for responses. A new one should be created soon."
+      output = "Sorry, the game on #{Game.last.game_date.strftime("%a %b %d")} game is now closed for responses. Please talk to your captain about any changes."
     end 
 
     #if I am the sender... 
@@ -64,8 +49,7 @@ class NotificationsController < ApplicationController
 
       @message_body = process_message_text(@body)
 
-      #let's add some commands (refactor later) 
-
+      #chad commands 
       if @command == "quote"
         if @is_new
           quote = @message_body.capitalize 
@@ -90,7 +74,6 @@ class NotificationsController < ApplicationController
           message += "\n-- #{quote.attributed_to.titleize}"
         end 
         send_me(message)
-
       elsif @command == "shufflestatus"
         g = Game.last 
         player_names = []
@@ -108,10 +91,6 @@ class NotificationsController < ApplicationController
       elsif @command == "tags"
         message = quote_tags.join(", ")
         send_me(message)
-
-          
-
-
       elsif @command == "shufflenew"
 
         if Date.today.wday == 2
@@ -129,7 +108,6 @@ class NotificationsController < ApplicationController
         g.result = "W"
         g.save 
         send_whole_team("Nice job on the win Ethel! That is our #{Game.where(result: "W").count.ordinalize} win for the season. So far we have #{Game.where(result: "L").count} losses.")
-
       elsif @command == "loss"
         g = Game.last 
         g.result = "L"
@@ -141,8 +119,7 @@ class NotificationsController < ApplicationController
 
     else
       if !output
-
-        output = "This is not the droid you are looking for."
+        output = "Ooops, I did it again."
       end 
     end
 
@@ -204,7 +181,6 @@ class NotificationsController < ApplicationController
       sanitized_body.join(' ').downcase
 
       #output original body without any coded text
-
   end
 
   def process_game_reply(u, g)
@@ -234,6 +210,8 @@ class NotificationsController < ApplicationController
 
         elsif total_replies == 5
             #ideal case scenario
+            output = "Thanks #{u.first_name} for your response. \nYou were #{total_replies.ordinalize} and final player to get back to me."
+            send_me("For Chad: #{u.first_name} just replied with #{@message_array[0]} for the 5th response.")
             if g.game_players.count == 4 && g.game_benches.count == 1
               message = "Well, that worked out. \n Playing: #{g.game_players.all.first.user.first_name}, #{g.game_players.all.second.user.first_name}, #{g.game_players.all.third.user.first_name}, #{g.game_players.all.fourth.user.first_name}. \n Bench: #{g.game_benches.all.first.user.first_name}\n Don't forget the tangs! Go Ethel!"
               send_whole_team(message)
@@ -307,7 +285,6 @@ class NotificationsController < ApplicationController
 
         end 
         output 
-
   end 
 
   #command for creating a game 
@@ -339,12 +316,22 @@ class NotificationsController < ApplicationController
                     :body => "From Shufflebot: \n#{message}"
                     )
         end
-    
   end 
 
-def send_me(message)
+  # command for sending a message to the user. 
+  def send_user(message, user)
+      @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
 
-  @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
+      from = ENV['TWILIO_PHONE']
+      @client.account.messages.create(
+                  :from => from,
+                  :to => user.phone,
+                  :body => "For #{user.first_name}: #{message}"
+                  )
+  end 
+
+  def send_me(message)
+    @client = Twilio::REST::Client.new ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN']
 
       from = ENV['TWILIO_PHONE']
       @client.account.messages.create(
@@ -352,9 +339,7 @@ def send_me(message)
                   :to => "+19179684122",
                   :body => "#{message}"
                   )
-    
   end 
-
 
   def respond(message)
     response = Twilio::TwiML::Response.new do |r|
