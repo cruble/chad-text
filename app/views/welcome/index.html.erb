@@ -24,3 +24,18 @@
   </tr>
   <% end %>
 </table>
+
+<% if @user %>
+  <% if @user.first_name == "Chad" %>
+  <% count = 1 %>
+  <% @nuggets[-6..-1].each do |nugget| %>
+    <h1>Nugget <%= count %></h1>
+    <li> <%= nugget.content %></li>
+    <li> <%= nugget.tag %></li>
+    <li> <%= nugget.attributed_to %></li>
+    <% count += 1 %>
+  <% end  %>
+
+
+  <% end  %>
+<% end %>

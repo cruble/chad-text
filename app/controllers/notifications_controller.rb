@@ -113,6 +113,9 @@ class NotificationsController < ApplicationController
         g.result = "L"
         g.save 
         send_whole_team("Tough break on the loss Ethel. That is our #{Game.where(result: "L").count.ordinalize} loss.\nBut we have #{Game.where(result: "W").count} wins.\nLook on the bright side!")
+      elsif @command == "flip"
+        heads_or_tails = ["heads", "tails"]
+        output = "I tossed a coin and it came up #{heads_or_tails.sample}."
       else
         # output = "No command found. Hi #{user.first_name}. You still rock."
       end
