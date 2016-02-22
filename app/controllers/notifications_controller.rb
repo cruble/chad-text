@@ -38,7 +38,7 @@ class NotificationsController < ApplicationController
       # end 
 
 
-    elsif user && Game.last.status == "closed" && @in_array.include?(@message_array[0]) && @out_array.include?(@message_array[0])
+    elsif user && Game.last.status == "closed" && (@in_array.include?(@message_array[0]) || @out_array.include?(@message_array[0]))
       output = "Sorry, the game on #{Game.last.game_date.strftime("%a %b %d")} game is now closed for responses. Please talk to your captain about any changes."
     end 
 
