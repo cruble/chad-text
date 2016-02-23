@@ -29,13 +29,22 @@
   <% if @user.first_name == "Chad" %>
   <% count = 1 %>
   <% @nuggets[-6..-1].each do |nugget| %>
-    <h1>Nugget <%= count %></h1>
-    <li> <%= nugget.content %></li>
-    <li> <%= nugget.tag %></li>
-    <li> <%= nugget.attributed_to %></li>
-    <% count += 1 %>
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="panel panel-default">
+      <div class="panel-body">
+        <%= nugget.content %>
+      </div>  
+      <div class="panel-footer"><%= nugget.attributed_to %></div>
+
+      </div>
+    </div>
+  </div>
+
   <% end  %>
 
 
   <% end  %>
 <% end %>
+
+

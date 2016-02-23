@@ -13,7 +13,7 @@ class NotificationsController < ApplicationController
 
     @in_array = ['in', 'i', 'y', 'yes']
     @out_array = ['out', 'o', 'n', 'no']
-        # split message into array of words
+    # split message into array of words
     @message_array = @body.split
 
     # if session["status"] == "Player-Reply"
@@ -116,6 +116,8 @@ class NotificationsController < ApplicationController
       elsif @command == "flip"
         heads_or_tails = ["heads", "tails"]
         output = "I tossed a coin and it came up #{heads_or_tails.sample}."
+      elsif @command == "syntax"
+        output = "Quotes:\n#tag  -attributed_to- +n content\n"
       else
         # output = "No command found. Hi #{user.first_name}. You still rock."
       end
